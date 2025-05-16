@@ -1,51 +1,5 @@
 import { useState, useEffect } from "react";
 import "../DemoUsePopCorn/style.css";
-const tempMovieData = [
-  {
-    imdbID: "tt1375666",
-    Title: "Inception",
-    Year: "2010",
-    Poster:
-      "https://m.media-amazon.com/images/M/MV5BMjAxMzY3NjcxNF5BMl5BanBnXkFtZTcwNTI5OTM0Mw@@._V1_SX300.jpg",
-  },
-  {
-    imdbID: "tt0133093",
-    Title: "The Matrix",
-    Year: "1999",
-    Poster:
-      "https://m.media-amazon.com/images/M/MV5BNzQzOTk3OTAtNDQ0Zi00ZTVkLWI0MTEtMDllZjNkYzNjNTc4L2ltYWdlXkEyXkFqcGdeQXVyNjU0OTQ0OTY@._V1_SX300.jpg",
-  },
-  {
-    imdbID: "tt6751668",
-    Title: "Parasite",
-    Year: "2019",
-    Poster:
-      "https://m.media-amazon.com/images/M/MV5BYWZjMjk3ZTItODQ2ZC00NTY5LWE0ZDYtZTI3MjcwN2Q5NTVkXkEyXkFqcGdeQXVyODk4OTc3MTY@._V1_SX300.jpg",
-  },
-];
-
-const tempWatchedData = [
-  {
-    imdbID: "tt1375666",
-    Title: "Inception",
-    Year: "2010",
-    Poster:
-      "https://m.media-amazon.com/images/M/MV5BMjAxMzY3NjcxNF5BMl5BanBnXkFtZTcwNTI5OTM0Mw@@._V1_SX300.jpg",
-    runtime: 148,
-    imdbRating: 8.8,
-    userRating: 10,
-  },
-  {
-    imdbID: "tt0088763",
-    Title: "Back to the Future",
-    Year: "1985",
-    Poster:
-      "https://m.media-amazon.com/images/M/MV5BZmU0M2Y1OGUtZjIxNi00ZjBkLTg1MjgtOWIyNThiZWIwYjRiXkEyXkFqcGdeQXVyMTQxNzMzNDI@._V1_SX300.jpg",
-    runtime: 116,
-    imdbRating: 8.5,
-    userRating: 9,
-  },
-];
 
 const KEY = "f6f97b28";
 
@@ -53,52 +7,77 @@ const average = (arr) =>
   arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
 
 export default function UsePopCorn() {
+  const [query, setQuery] = useState("");
   const [watched, setWatched] = useState([]);
   const [movies, setMovies] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [selectId, setSelectId] = useState(null);
 
-  const query = "interstellar";
+  const tempQuery = "interstellar";
 
-  useEffect(function () {
-    async function fetchMovies() {
-      try {
-        setIsLoading(true);
+  function handleSelectMovie(id) {
+    setSelectId(selectId => id === selectId ? null : id);
+  }
+  function hanldeCloseMovie() {
+    setSelectId(null);
+  }
 
-        const res = await fetch(
-          `http://www.omdbapi.com/?i=tt3896198&apikey=${KEY}&s=${query}`
-        );
+  //? fetch movie
+  useEffect(
+    function () {
+      async function fetchMovies() {
+        if (!query.trim()) {
+          setMovies([]);
+          setError("");
+          setIsLoading(false);
+          return;
+        }
 
-        if (!res.ok)
-          throw new Error("Something went wrong! with fetching movie");
+        try {
+          setIsLoading(true);
+          setError("");
 
-        const data = await res.json();
+          const res = await fetch(
+            `http://www.omdbapi.com/?i=tt3896198&apikey=${KEY}&s=${query}`
+          );
 
-        if(data.Response === 'False')
-          throw new Error("Movie not Found");
+          if (!res.ok)
+            throw new Error("Something went wrong! with fetching movie");
 
-        setMovies(data.Search);
+          const data = await res.json();
 
-        setIsLoading(false);
-      } catch (err) {
-        console.log(err.message);
+          if (data.Response === "False") throw new Error("Movie not Found");
 
-        setError(err.message);
+          setMovies(data.Search);
+          console.log(data.Search);
+          setIsLoading(false);
+        } catch (err) {
+          console.log(err.message);
 
-      } finally {
-        setIsLoading(false);
+          setError(err.message);
+        } finally {
+          setIsLoading(false);
+        }
       }
-    }
-    fetchMovies();
-  }, []);
 
-  
+      if (!query.length) {
+        setMovies([]);
+        setError("");
+        setIsLoading(false);
+        return;
+      }
+
+      fetchMovies();
+    },
+    [query]
+  );
 
   return (
     <>
       <NavbarHeader>
         <Logo />
-        <SearchMovies />
+        <SearchMovies query={query} setQuery={setQuery} />
         <NumResults movies={movies} />
       </NavbarHeader>
 
@@ -107,14 +86,25 @@ export default function UsePopCorn() {
           {/* {isLoading ? <Loader /> : <MovieList movies={movies} />} */}
           {isLoading && <Loader />}
 
-          {!isLoading && !error && <MovieList movies={movies} />}
+          {!isLoading && !error && (
+            <MovieList movies={movies} onSelectMovie={handleSelectMovie} />
+          )}
 
           {error && <ErrorMessage message={error} />}
         </Box>
 
         <Box>
-          <WatchSummary watched={watched} />
-          <WatchMovieList watched={watched} />
+          {selectId ? (
+            <MovieDetails
+              selectedId={selectId}
+              onCloseMovies={hanldeCloseMovie}
+            />
+          ) : (
+            <>
+              <WatchSummary watched={watched} />
+              <WatchMovieList watched={watched} />
+            </>
+          )}
         </Box>
       </Main>
     </>
@@ -136,8 +126,7 @@ function NumResults({ movies }) {
     </>
   );
 }
-function SearchMovies() {
-  const [query, setQuery] = useState("");
+function SearchMovies({ query, setQuery }) {
   return (
     <>
       <input
@@ -167,10 +156,14 @@ function NavbarHeader({ children }) {
     </>
   );
 }
-function Movie({ movie }) {
+function Movie({ movie, onSelectMovie }) {
   return (
     <>
-      <li key={movie.imdbID}>
+      <li
+        onClick={() => {
+          onSelectMovie(movie.imdbID);
+        }}
+      >
         <img src={movie.Poster} alt={`${movie.Title} poster`} />
         <h3>{movie.Title}</h3>
         <div>
@@ -183,12 +176,16 @@ function Movie({ movie }) {
     </>
   );
 }
-function MovieList({ movies }) {
+function MovieList({ movies, onSelectMovie }) {
   return (
     <>
-      <ul className="list">
+      <ul className="list list-movies">
         {movies?.map((movie) => (
-          <Movie movie={movie} key={movie.imdbID} />
+          <Movie
+            movie={movie}
+            key={movie.imdbID}
+            onSelectMovie={onSelectMovie}
+          />
         ))}
       </ul>
     </>
@@ -211,6 +208,20 @@ function Box({ children }) {
     </>
   );
 }
+
+function MovieDetails({ selectedId, onCloseMovies }) {
+  return (
+    <>
+      <div className="details">
+        <button className="btn-black" onClick={onCloseMovies}>
+          &larr;
+        </button>
+        {selectedId}
+      </div>
+    </>
+  );
+}
+
 function WatchSummary({ watched }) {
   const avgImdbRating = average(watched.map((movie) => movie.imdbRating));
   const avgUserRating = average(watched.map((movie) => movie.userRating));
