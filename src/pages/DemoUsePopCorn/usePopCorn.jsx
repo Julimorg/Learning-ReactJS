@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import "../DemoUsePopCorn/style.css";
+// import "../DemoUsePopCorn/style.css";
 import StarRating from "../DemoUsePopCorn/StartRating";
 import ErrorMessage from "./Components/ErrorMessage";
 import Loader from "./Components/Loader";

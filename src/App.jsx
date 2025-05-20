@@ -8,6 +8,7 @@ import FlashCardQuizz from "./pages/flashCardQuizz/FlashCardQuizz";
 import EatAndSplit from "./pages/EatAndSplit/EatAndSplit";
 import UsePopCorn from "./pages/DemoUsePopCorn/usePopCorn";
 import TabBox from "./pages/TabBox/TabBox";
+import ChangeMoney from "./pages/Money/ChangeMoney";
 
 function App() {
   return (
@@ -20,6 +21,8 @@ function App() {
         <Route path ="/eatandsplit" element = {<EatAndSplit/>} />
         <Route path = "/usePopcorn"  element = {<UsePopCorn/>}/>
         <Route path = "/tabBox"  element = {<TabBox/>}/>
+        <Route path = "/changemoney"  element = {<ChangeMoney/>}/>
+
 
 
       </Routes>
