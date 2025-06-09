@@ -7,19 +7,21 @@ import NumResults from "./Components/NumResult";
 import SearchMovies from "./SearchMovies";
 import Logo from "./Components/Logo";
 import NavbarHeader from "./Components/NavbarHeader";
-const KEY = "f6f97b28";
+import { useMovie } from "./Hook/useMovie";
+import { useLocalStorageState } from "./Hook/useLocalStorageState";
+    const KEY = "f6f97b28";
+
 
 const average = (arr) =>
   arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
 
 export default function UsePopCorn() {
   const [query, setQuery] = useState("");
-  const [watched, setWatched] = useState([]);
-  const [movies, setMovies] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
   const [selectId, setSelectId] = useState(null);
-
+  const {movies, isLoading, error} = useMovie(query);
+  const {watched, setWatched} = useLocalStorageState([], "watched");
+ 
+  
   function handleSelectMovie(id) {
     setSelectId((selectId) => (id === selectId ? null : id));
   }
@@ -32,65 +34,8 @@ export default function UsePopCorn() {
   function handleDeleteWatched(id) {
     setWatched((watched) => watched.filter((movie) => movie.imbdID !== id));
   }
-  //? fetch movie
-  useEffect(
-    function () {
 
-      const controller = new AbortController();
-
-      async function fetchMovies() {
-        if (!query.trim()) {
-          setMovies([]);
-          setError("");
-          setIsLoading(false);
-          return;
-        }
-
-        try {
-          setIsLoading(true);
-          setError("");
-
-          const res = await fetch(
-            `http://www.omdbapi.com/?apikey=${KEY}&s=${query}`,
-
-            {signal: controller.signal}
-          );
-
-          if (!res.ok)
-            throw new Error("Something went wrong! with fetching movie");
-
-          const data = await res.json();
-
-          if (data.Response === "False") throw new Error("Movie not Found");
-
-          setMovies(data.Search);
-          console.log(data.Search);
-          setIsLoading(false);
-        } catch (err) {
-          console.log(err.message);
-
-          setError(err.message);
-        } finally {
-          setIsLoading(false);
-        }
-      }
-
-      if (!query.length) {
-        setMovies([]);
-        setError("");
-        setIsLoading(false);
-        return;
-      }
-
-      fetchMovies();
-
-      return function(){
-        controller.abort();
-      }
-    },
-    [query]
-  );
-
+ 
   return (
     <>
       <NavbarHeader>
@@ -198,6 +143,8 @@ function MovieDetails({ selectedId, onCloseMovies, onAddWatched, watched }) {
     (movie) => movie.imbdID == selectedId
   )?.userRating;
 
+
+
   console.log(watchedUserrating);
   console.log(isWatched);
   const {
@@ -213,6 +160,8 @@ function MovieDetails({ selectedId, onCloseMovies, onAddWatched, watched }) {
     Genre: genre,
   } = movie;
 
+  const [avgRating, setAvgRating] = useState(0);
+
   function handleAdd() {
     const newWatchedMovie = {
       imdbID: selectedId,
@@ -224,13 +173,15 @@ function MovieDetails({ selectedId, onCloseMovies, onAddWatched, watched }) {
       userRating,
     };
     onAddWatched(newWatchedMovie);
-    onCloseMovies();
+    // onCloseMovies();
+
+   setAvgRating(Number(imdbRating));
+   setAvgRating(avgRating => (avgRating + userRating) / 2);
+
   }
 
   useEffect(
     function () {
-      
-    
       async function getMovieDetails() {
         setIsLoading(true);
         const res = await fetch(
@@ -280,6 +231,7 @@ function MovieDetails({ selectedId, onCloseMovies, onAddWatched, watched }) {
                 <p>{imdbRating} rating</p>
               </div>
             </header>
+            <p>{avgRating}</p>
             <section>
               {!isWatched ? (
                 <>

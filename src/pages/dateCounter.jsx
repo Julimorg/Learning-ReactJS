@@ -111,6 +111,7 @@ function Counter() {
             <Link to="/usePopcorn"> use pop corn</Link>
             <Link to="/tabBox"> Tab Box</Link>
             <Link to="/changemoney"> changemoney</Link>
+            <Link to="/geolocate"> geolocate</Link>
 
 
 

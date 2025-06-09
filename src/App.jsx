@@ -9,6 +9,7 @@ import EatAndSplit from "./pages/EatAndSplit/EatAndSplit";
 import UsePopCorn from "./pages/DemoUsePopCorn/usePopCorn";
 import TabBox from "./pages/TabBox/TabBox";
 import ChangeMoney from "./pages/Money/ChangeMoney";
+import GeolocatePage from "./pages/Geolocate/GeolocatePage";
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
         <Route path = "/usePopcorn"  element = {<UsePopCorn/>}/>
         <Route path = "/tabBox"  element = {<TabBox/>}/>
         <Route path = "/changemoney"  element = {<ChangeMoney/>}/>
+        <Route path = "/geolocate"  element = {<GeolocatePage/>}/>
 
 
 
