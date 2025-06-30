@@ -8,9 +8,10 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "server": "json-server --watch data/questions.json --port 8000"
+    "server": "json-server --watch data/cities.json --port 8000"
   },
   "dependencies": {
+    "@faker-js/faker": "^9.8.0",
     "@tanstack/react-query": "^5.80.7",
     "@tanstack/react-query-devtools": "^5.80.7",
     "axios": "^1.10.0",

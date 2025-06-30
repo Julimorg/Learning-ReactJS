@@ -113,6 +113,8 @@ function Counter() {
             <Link to="/changemoney"> changemoney</Link>
             <Link to="/geolocate"> geolocate</Link>
             <Link to="/quizz"> quizzpage</Link>
+            <Link to="/automic-blog"> automic-bloc</Link>
+            <Link to="/world-wise"> world wise</Link>
 
 
 

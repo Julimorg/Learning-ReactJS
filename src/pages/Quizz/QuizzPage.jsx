@@ -3,6 +3,7 @@ import Header from './Header';
 import Main from './Main';
 import Loader from './Loader';
 import Error from './Error';
+import Questions from './Questions';
 import { useEffect, useReducer } from 'react';
 import '../Quizz/index.css';
 import StartScreen from './StartScreen';
@@ -18,6 +19,9 @@ function reducer(state, action) {
       return { ...state, questions: action.payload, status: 'ready' };
     case 'dataFailed':
       return { ...state, status: 'error' };
+    case  "start":
+      return {...state, status: "active"};
+
     default:
       throw new Error('Action Unknown');
   }
@@ -25,12 +29,14 @@ function reducer(state, action) {
 
 function QuizzPage() {
   const [{ questions, status }, dispatch] = useReducer(reducer, initialState);
+  const numQuestions = questions.length
 
   useEffect(() => {
     async function fetchQuestion() {
       try {
         const res = await fetch('http://localhost:8000/questions');
         const data = await res.json();
+        console.log(data);
         if (res.ok) {
           dispatch({ type: 'dataReceived', payload: data });
         } else {
@@ -39,6 +45,7 @@ function QuizzPage() {
       } catch (e) {
         console.error(e);
         dispatch({ type: 'dataFailed' });
+        
       }
     }
     fetchQuestion();
@@ -55,7 +62,12 @@ function QuizzPage() {
         </Main>
         <h1>{status === 'loading' && <Loader />}
           {status === 'error' && <Error />}
-          {status === 'ready' && <StartScreen  />}</h1>
+          {status === 'ready' && <StartScreen 
+                                  numQuestions = {numQuestions}
+                                  dispatch = {dispatch}
+                                  />}
+          {status === 'active' && <Questions/>}
+          </h1>
       </div>
     </>
   );
